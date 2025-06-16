@@ -19,12 +19,4 @@ azure-storage-blob
 beautifulsoup4
 pydantic
 azure-cognitiveservices-speech
-fastapi
-sse_starlette
-sseclient-py
-uvicorn
 gunicorn
-
-
-
-

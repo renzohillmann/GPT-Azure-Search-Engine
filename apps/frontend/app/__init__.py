@@ -20,10 +20,6 @@ def get_env_var(var_name, default_value=None, required=True):
 # -----------------------------------------------------------------------------
 # 1) Endpoint & Model Config
 # -----------------------------------------------------------------------------
-# The backend SSE endpoint, e.g. "http://localhost:8000" or your deployed URL.
-# We'll append "/stream" for SSE.
-api_url = get_env_var("FAST_API_SERVER", required=True).rstrip("/") + "/stream"
-
 # The primary model name or deployment name for OpenAI / Azure OpenAI
 model_name = get_env_var("GPT4o_DEPLOYMENT_NAME", required=True)
 

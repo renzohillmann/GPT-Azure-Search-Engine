@@ -18,8 +18,6 @@
 - Multi-Modality Notebook 11 Added. 
   - audio_utils.py contains all the functions to add Whisper, TTS and Azure Speech Service capabilities
   - Images and Audio input are now included on the notebooks and on the supervisor architecture
-- Remove dependency of LangServe. Now it is FastAPI native only.
-  - Based on customer's feedback. The FastAPI does not use LangServe code. It is only FastAPI code.
-  - Implemented /stream endpoint using the Standard SSE Format (Servers side Events).
+- FastAPI backend removed. The project now ships only with the Bot Framework backend.
 - Web App frontend now allows for the user to speak to the Agent via the microphone
   

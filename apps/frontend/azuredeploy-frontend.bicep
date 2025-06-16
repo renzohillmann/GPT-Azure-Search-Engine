@@ -64,7 +64,6 @@ param location string = resourceGroup().location
 
 // Define Variables
 var backendWebAppName = 'webApp-Backend-${botServiceName}'
-var fastAPIsiteHost = 'https://${backendWebAppName}-staging.azurewebsites.net'
 
 // Existing Azure Search service.
 resource azureSearch 'Microsoft.Search/searchServices@2021-04-01-preview' existing = {
@@ -149,10 +148,6 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'AZURE_OPENAI_TTS_MODEL_NAME'
           value: openAITTSModelName
-        }
-        {
-          name: 'FAST_API_SERVER'
-          value: fastAPIsiteHost
         }
         {
           name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'

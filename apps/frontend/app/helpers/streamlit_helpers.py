@@ -4,9 +4,7 @@ import json
 import uuid
 import os
 
-import requests
 import streamlit as st
-from sseclient import SSEClient  # Import SSEClient from sseclient-py
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain import hub
 
@@ -68,87 +66,6 @@ def get_or_create_ids():
         logger.info("Found existing user_id: %s", st.session_state["user_id"])
 
     return st.session_state["session_id"], st.session_state["user_id"]
-
-def consume_api(url, user_query, session_id, user_id):
-    """
-    Send a POST request to the FastAPI backend at `url` (/stream endpoint),
-    and consume the SSE stream using sseclient-py.
-
-    The server is expected to return events like:
-        {"event": "metadata", "data": "..."}
-        {"event": "data", "data": "..."}
-        {"event": "on_tool_start", "data": "..."}
-        {"event": "on_tool_end", "data": "..."}
-        {"event": "end", "data": "..."}
-        {"event": "error", "data": "..."}
-    """
-    headers = {"Content-Type": "application/json"}
-    payload = {
-        "user_input": user_query,
-        "thread_id": session_id
-    }
-
-    logger.info(
-        "Sending SSE request to %s with session_id=%s, user_id=%s",
-        url, session_id, user_id
-    )
-    logger.debug("Payload: %s", payload)
-
-    try:
-        with requests.post(url, json=payload, headers=headers, stream=True) as resp:
-            resp.raise_for_status()
-            logger.info("SSE stream opened with status code: %d", resp.status_code)
-
-            client = SSEClient(resp)
-            for event in client.events():
-                if not event.data:
-                    # Skip empty lines
-                    continue
-
-                evt_type = event.event
-                evt_data = event.data
-                logger.debug("Received SSE event: %s, data: %s", evt_type, evt_data)
-
-                if evt_type == "metadata":
-                    # Possibly parse run_id from the JSON
-                    # e.g. { "run_id": "...some uuid..." }
-                    info = json.loads(evt_data)
-                    run_id = info.get("run_id", "")
-                    # For streamlit, you might store it as session state, etc.
-                    # st.write(f"New run_id: {run_id}")
-
-                elif evt_type == "data":
-                    # The server is sending partial tokens as "data"
-                    # We can yield them so Streamlit can display incrementally
-                    yield evt_data
-
-                elif evt_type == "on_tool_start":
-                    # Optionally display: yield or do a Streamlit update
-                    # yield f"[Tool Start] {evt_data}"
-                    pass
-
-                elif evt_type == "on_tool_end":
-                    # yield f"[Tool End] {evt_data}"
-                    pass
-
-                elif evt_type == "end":
-                    # This is the final text. 
-                    # Typically you might do a final display or update the UI
-                    yield evt_data
-
-                elif evt_type == "error":
-                    # The server had an error
-                    yield f"[SSE Error] {evt_data}"
-
-                else:
-                    yield f"[Unrecognized event: {evt_type}] {evt_data}"
-
-    except requests.exceptions.HTTPError as err:
-        logger.error("HTTP Error: %s", err)
-        yield f"[HTTP Error] {err}"
-    except Exception as e:
-        logger.error("An error occurred during SSE consumption: %s", e)
-        yield f"[Error] {e}"
 
 def initialize_chat_history(model):
     """
