@@ -86,9 +86,7 @@ checkpointer_async = AsyncCosmosDBSaver(
 )
 
 # Setup the checkpointer (async). We can do so using run_until_complete here:
-loop = asyncio.get_event_loop()
-loop.run_until_complete(checkpointer_async.setup())
-
+asyncio.run(checkpointer_async.setup())
 # -----------------------------------------------------------------------------
 # 2) Pass that single checkpointer to the bot.
 # -----------------------------------------------------------------------------
