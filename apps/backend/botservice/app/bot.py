@@ -4,7 +4,7 @@ from botbuilder.schema import ChannelAccount, Activity, ActivityTypes
 from common.cosmosdb_checkpointer import AsyncCosmosDBSaver
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 
-from common.graph import build_async_workflow 
+from common.graph import build_csv_workflow
 from common.prompts import WELCOME_MESSAGE
 
 
@@ -14,10 +14,9 @@ class MyBot(ActivityHandler):
         self.checkpointer = cosmos_checkpointer
 
         csv_file_path = "data/all-states-history.csv"
-        api_file_path = "data/openapi_kraken.json"
 
-        # 1) Build the multi-agent workflow
-        workflow = build_async_workflow(csv_file_path,api_file_path)
+        # 1) Build the CSV workflow
+        workflow = build_csv_workflow(csv_file_path)
 
         # 2) Compile with the checkpointer
         self.graph_async = workflow.compile(checkpointer=self.checkpointer)
@@ -40,7 +39,7 @@ class MyBot(ActivityHandler):
         config_async = {"configurable": {"thread_id": session_id}}
         inputs = {"messages": [("human", user_text)]}
 
-        # 3) Invoke the multi-agent workflow
+        # 3) Invoke the workflow
         result = await self.graph_async.ainvoke(inputs, config=config_async)
 
         # 4) The final answer is in the last message

@@ -10,6 +10,15 @@ import asyncio
 import traceback
 from datetime import datetime
 
+# Add the project root to the Python path
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parents[4]))  # Go up 4 levels to reach the project root
+
+# Load environment variables from .env file
+from dotenv import load_dotenv
+load_dotenv()
+
 from aiohttp import web
 from aiohttp.web import Request, Response, json_response
 from botbuilder.core import TurnContext
@@ -28,7 +37,12 @@ CONFIG = DefaultConfig()
 
 # Create adapter.
 # See https://aka.ms/about-bot-adapter to learn more about how bots work.
-ADAPTER = CloudAdapter(ConfigurationBotFrameworkAuthentication(CONFIG))
+AUTH = (
+    ConfigurationBotFrameworkAuthentication(CONFIG)
+    if CONFIG.APP_ID
+    else None
+)
+ADAPTER = CloudAdapter(AUTH)
 
 # Catch-all for errors
 async def on_error(context: TurnContext, error: Exception):
@@ -71,14 +85,11 @@ checkpointer_async = AsyncCosmosDBSaver(
     serde=JsonPlusSerializer(),
 )
 
-# Setup the checkpointer (async). We can do so using run_until_complete here:
-loop = asyncio.get_event_loop()
-loop.run_until_complete(checkpointer_async.setup())
 
-# -----------------------------------------------------------------------------
 # 2) Pass that single checkpointer to the bot.
 # -----------------------------------------------------------------------------
 BOT = MyBot(cosmos_checkpointer=checkpointer_async)
+
 
 # Listen for incoming requests on /api/messages
 async def messages(req: Request) -> Response:
@@ -88,8 +99,11 @@ async def messages(req: Request) -> Response:
 APP = web.Application(middlewares=[aiohttp_error_middleware])
 APP.router.add_post("/api/messages", messages)
 
+# Initialize at startup
+async def init_app():
+    await checkpointer_async.setup()
+    return APP
+
+# Single entry point
 if __name__ == "__main__":
-    try:
-        web.run_app(APP, host="localhost", port=CONFIG.PORT)
-    except Exception as error:
-        raise error
+    web.run_app(init_app(), host="localhost", port=CONFIG.PORT)
