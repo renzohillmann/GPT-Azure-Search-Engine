@@ -138,8 +138,7 @@
     }
   },
   "variables": {
-    "backendWebAppName": "[format('webApp-Backend-{0}', parameters('botServiceName'))]",
-    "fastAPIsiteHost": "[format('https://{0}-staging.azurewebsites.net', variables('backendWebAppName'))]"
+    "backendWebAppName": "[format('webApp-Backend-{0}', parameters('botServiceName'))]"
   },
   "resources": [
     {
@@ -222,10 +221,6 @@
             {
               "name": "AZURE_OPENAI_TTS_MODEL_NAME",
               "value": "[parameters('openAITTSModelName')]"
-            },
-            {
-              "name": "FAST_API_SERVER",
-              "value": "[variables('fastAPIsiteHost')]"
             },
             {
               "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
