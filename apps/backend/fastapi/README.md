@@ -16,7 +16,7 @@ az webapp deployment slot create --name "<name-of-backend-app-service>" --resour
 2. Zip the code of the bot by executing the following command in the terminal (**you have to be inside the apps/backend/fastapi/ folder**):
 
 ```bash
-(cd ../../../ && zip -r apps/backend/fastapi/backend.zip common data/openapi_kraken.json data/all-states-history.csv) && zip -j backend.zip ../../../common/requirements.txt app/*
+(cd ../../../ && zip -r apps/backend/fastapi/backend.zip common data/all-states-history.csv) && zip -j backend.zip ../../../common/requirements.txt app/*
 ```
 
 3. Using the Azure CLI deploy the bot code to the Azure App Service new SLOT created on Step 1:
@@ -48,7 +48,6 @@ You can also run the server locally for testing.
 # sys.path.append(str(library_path))   # ensure we can import "common" etc.
 # load_dotenv(str(library_path) + "/credentials.env")
 # csv_file_path = data_path / "all-states-history.csv"
-# api_file_path = data_path / "openapi_kraken.json"
 
 ```
 2. Open a terminal, activate the right conda environment, then go to this folder `apps/backend/fastapi/app` and run this command:

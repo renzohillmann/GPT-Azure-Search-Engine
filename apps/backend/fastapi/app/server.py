@@ -17,7 +17,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 csv_file_path = "data/all-states-history.csv"
-api_file_path = "data/openapi_kraken.json"
 
 ######### Uncomment this section to run locally##########
 # current_file = Path(__file__).resolve()
@@ -26,11 +25,10 @@ api_file_path = "data/openapi_kraken.json"
 # sys.path.append(str(library_path))   # ensure we can import "common" etc.
 # load_dotenv(str(library_path) + "/credentials.env")
 # csv_file_path = data_path / "all-states-history.csv"
-# api_file_path = data_path / "openapi_kraken.json"
 ##########################################################
 
 # from the graph module
-from common.graph import build_async_workflow
+from common.graph import build_csv_workflow
 
 # For CosmosDB checkpointer
 from common.cosmosdb_checkpointer import AsyncCosmosDBSaver
@@ -60,7 +58,7 @@ checkpointer_async = AsyncCosmosDBSaver(
     serde=JsonPlusSerializer(),
 )
 
-workflow = build_async_workflow(csv_file_path,api_file_path )
+workflow = build_csv_workflow(csv_file_path)
 graph_async = None
 
 
