@@ -85,12 +85,11 @@ checkpointer_async = AsyncCosmosDBSaver(
     serde=JsonPlusSerializer(),
 )
 
-# Setup the checkpointer (async). We can do so using run_until_complete here:
-asyncio.run(checkpointer_async.setup())
-# -----------------------------------------------------------------------------
+
 # 2) Pass that single checkpointer to the bot.
 # -----------------------------------------------------------------------------
 BOT = MyBot(cosmos_checkpointer=checkpointer_async)
+
 
 # Listen for incoming requests on /api/messages
 async def messages(req: Request) -> Response:
@@ -100,8 +99,11 @@ async def messages(req: Request) -> Response:
 APP = web.Application(middlewares=[aiohttp_error_middleware])
 APP.router.add_post("/api/messages", messages)
 
+# Initialize at startup
+async def init_app():
+    await checkpointer_async.setup()
+    return APP
+
+# Single entry point
 if __name__ == "__main__":
-    try:
-        web.run_app(APP, host="localhost", port=CONFIG.PORT)
-    except Exception as error:
-        raise error
+    web.run_app(init_app(), host="localhost", port=CONFIG.PORT)
